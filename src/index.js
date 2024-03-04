@@ -10,8 +10,7 @@ dotenv.config({
 })
 
 
-
-
+// import and Connecting DB 
 connectDB()
 .then(() =>{
     app.on
