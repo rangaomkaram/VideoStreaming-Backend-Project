@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinaryService.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 const registerUser = asyncHandler(async(req,res) =>{
     // get user details from frontend/ form(postman)
@@ -48,13 +49,28 @@ const registerUser = asyncHandler(async(req,res) =>{
 
    // object creation for DB entry
 
-   User.create({
+   const user = await User.create({
     fullName,
     username : username.toLowerCase(),
     email,
     password,
     coverImage : coverImage?.url || ""
    })
+
+   // checking the user creating by using findById method
+   // After creation , we remove password and refreshToken ,By using select method with "-attr1 -attr2" 
+    const  userCreated =  await User.findById(user._id).select(
+       "-password -refreshToken"
+    )
+
+    if(!userCreated){
+        throw new ApiError(500, "Something went wrong while registering by the User")
+    }
+
+    return res.status(201).json(
+        new ApiResponse(200, userCreated, "User Successfully Created !!!!")
+    )
+
 })
 
 export {registerUser}
