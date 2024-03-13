@@ -25,7 +25,7 @@ const registerUser = asyncHandler(async(req,res) =>{
     }
     
     //$ dollar operator is used for logic gate operations (or , nor , and etc)
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })
 
@@ -54,6 +54,7 @@ const registerUser = asyncHandler(async(req,res) =>{
     username : username.toLowerCase(),
     email,
     password,
+    avatar : avatar.url,
     coverImage : coverImage?.url || ""
    })
 
