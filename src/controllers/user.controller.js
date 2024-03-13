@@ -3,6 +3,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinaryService.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 
 const registerUser = asyncHandler(async(req,res) =>{
     // get user details from frontend/ form(postman)
@@ -16,7 +18,8 @@ const registerUser = asyncHandler(async(req,res) =>{
     // return response
 
     const { email , username , fullName , password } = req.body
-    console.log("username is : ", username)
+    // console.log("username is : ", username,email,fullName,password)
+
 
     // check multiple fields using some
     if ([ fullName, email, username, password ].some((field) => field?.trim() === "" )) 
@@ -33,15 +36,15 @@ const registerUser = asyncHandler(async(req,res) =>{
         throw new ApiError(409, "username or User with email is already exists")
     }
 
-   const avatarLocalPath =  req.files?.avatar[0]?.path;
-   const coverImgLocalPath = req.files?.coverImage[0]?.path;
-
-   if(!avatarLocalPath){
+    const avatarLocalPath = req.files?.avatar[0]?.path;
+    const coverImgLocalPath = req.files?.coverImage[0]?.path;
+   
+    if(!avatarLocalPath){
     throw new ApiError(400, "Avatar file is required")
    }
 
-   const avatar = uploadOnCloudinary(avatarLocalPath);
-   const coverImage = uploadOnCloudinary(coverImgLocalPath);
+   const avatar = await uploadOnCloudinary(avatarLocalPath);
+   const coverImage = await uploadOnCloudinary(coverImgLocalPath);
 
    if(!avatar){
     throw new ApiError(400, "Avatar file / profile Image is required")
@@ -51,12 +54,12 @@ const registerUser = asyncHandler(async(req,res) =>{
 
    const user = await User.create({
     fullName,
-    username : username.toLowerCase(),
-    email,
+    avatar: avatar.url,
+    coverImage: coverImage?.url || "",
+    email, 
     password,
-    avatar : avatar.url,
-    coverImage : coverImage?.url || ""
-   })
+    username: username.toLowerCase()
+})
 
    // checking the user creating by using findById method
    // After creation , we remove password and refreshToken ,By using select method with "-attr1 -attr2" 

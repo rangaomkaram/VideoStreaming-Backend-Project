@@ -25,7 +25,7 @@ import userRouter from "./routes/user.routes.js";
 
 // routes declaration
 //imp -> middleware standard practice api/versionnum
-// how url looks http://localhost//PORT/api/v1/user/register
+// how url looks http://localhost//PORT/api/v1/users/register
 app.use("/api/v1/users",userRouter)
 
 export { app }
