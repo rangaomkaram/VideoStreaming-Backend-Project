@@ -145,7 +145,7 @@ const loginUser = asyncHandler(async(res,req) => {
         secure: true
     }
 
-    // response 
+    // response (send cookie)
 
     return res.status(200)
     .cookie("accessToken", accessToken, options)
@@ -166,7 +166,14 @@ const loginUser = asyncHandler(async(res,req) => {
 
 })
 
+
+// logout user
+
+const userLogout = asyncHandler(async(req, res) => {
+    // middleware (multer) 
+})
 export {
     registerUser,
-    loginUser
+    loginUser, 
+    userLogout
 }
