@@ -9,7 +9,8 @@ import { User } from "../models/user.model"
  for header we use Authorization
 Authorization : Bearer  <Token>
 */
-export const verifyJWT = asyncHandler(async(req, res, next) => {
+// response is not used for production grade code res (response) is replace with _
+export const verifyJWT = asyncHandler(async(req, _, next) => {
    try {
     const token =  req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
  
@@ -25,8 +26,12 @@ export const verifyJWT = asyncHandler(async(req, res, next) => {
      throw new ApiError(401, "Invalid Access Token")
      
     }
+    req.user = user;
+    next()
+
    } catch (error) {
     throw new ApiError(401, error?.message || "Invalid Access Token")
     
    }
+
 })
