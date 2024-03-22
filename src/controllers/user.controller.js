@@ -69,7 +69,7 @@ const registerUser = asyncHandler(async(req,res) =>{
 
 
 
-   
+
     if(!avatarLocalPath){
     throw new ApiError(400, "Avatar file is required")
    }
@@ -138,7 +138,29 @@ const loginUser = asyncHandler(async(res,req) => {
     
     const userLogged = await User.findById(user._id).select("-password -refreshToken");
 
-    
+    // for secure login 
+
+    const options = {
+        httpOnly : true,
+        secure: true
+    }
+
+    // response 
+
+    return res.status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                user: userLogged, accessToken, refreshToken
+            },
+            "user loggedIn Successfully !!"
+        )
+    )
+
+
     
     
 
