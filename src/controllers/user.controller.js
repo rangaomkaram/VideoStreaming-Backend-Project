@@ -6,23 +6,21 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
-const generateAccessAndRefreshTokens = async(userId) => {
+const generateAccessAndRefreshTokens = async(userId) =>{
     try {
         const user = await User.findById(userId)
-        const accessToken = user.generateAccessToken()
-        const refreshToken = user.generateRefreshToken()
+        const accessToken = await user.generateAccessToken()
+        const refreshToken = await user.generateRefreshToken()
 
-        user.refreshToken = refreshToken
+        user.refreshToken = refreshToken;
+        await user.save({validateBeforeSave:false})
 
-       await user.save({validateBeforeSave : false})
+        return {accessToken, refreshToken}
 
-       return { accessToken, refreshToken}
 
     } catch (error) {
-        throw new ApiError(500, "Something Went Wrong while generating accessToken and Refresh token")
-        
+        throw new ApiError(500, "Something went wrong while generating refresh and access token")
     }
-
 }
 
 const registerUser = asyncHandler(async(req,res) =>{
@@ -108,7 +106,7 @@ const registerUser = asyncHandler(async(req,res) =>{
 
 })
 
-const loginUser = asyncHandler(async(req,res) => {
+const loginUser = asyncHandler( async (req,res) => {
     // get data from -> req.body  
     // get the username or email
     // find username or email
@@ -118,28 +116,28 @@ const loginUser = asyncHandler(async(req,res) => {
 
     const {email, username, password} = req.body;
 
-    // if(!(username || email)){
-    //     throw new ApiError(400, "username or email is required")
-    // }
-    if (!username && !email) {
+    if(!(username || email)){
         throw new ApiError(400, "username or email is required")
     }
+    // if (!username && !email) {
+    //     throw new ApiError(400, "username or email is required")
+    // }
 
-    const user = await User.findOne({ $or :[{ username },{ email }]})
+    const existedUser = await User.findOne({ $or :[{ username },{ email }]})
 
-    if(!user){
+    if(!existedUser){
         throw new ApiError(404, "user  is not registered or user doesn't exist")
     }
 
-    const isPasswordValid = await user.isPasswordCorrect(password)
+    const isPasswordValid = await existedUser.isPasswordCorrect(password)
 
     if(!isPasswordValid){
-        throw new ApiError(401, "password is incorrect")
+        throw new ApiError(401, "Invalid User Credentials")
     }
 
-    const { accessToken, refreshToken} = await generateAccessAndRefreshTokens(user._id) 
+    const {accessToken, refreshToken} = await generateAccessAndRefreshTokens(existedUser._id) 
     
-    const userLogged = await User.findById(user._id).select("-password -refreshToken");
+    const userLogged = await User.findById(existedUser._id).select("-password -refreshToken");
 
     // for secure login 
 
@@ -162,10 +160,6 @@ const loginUser = asyncHandler(async(req,res) => {
             "user loggedIn Successfully !!"
         )
     )
-
-
-    
-    
 
 })
 
