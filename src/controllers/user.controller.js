@@ -16,8 +16,6 @@ const generateAccessAndRefreshTokens = async(userId) =>{
         await user.save({validateBeforeSave:false})
 
         return {accessToken, refreshToken}
-
-
     } catch (error) {
         throw new ApiError(500, "Something went wrong while generating refresh and access token")
     }
@@ -116,12 +114,12 @@ const loginUser = asyncHandler( async (req,res) => {
 
     const {email, username, password} = req.body;
 
-    if(!(username || email)){
-        throw new ApiError(400, "username or email is required")
-    }
-    // if (!username && !email) {
+    // if(!(username || email)){
     //     throw new ApiError(400, "username or email is required")
     // }
+    if (!username && !email) {
+        throw new ApiError(400, "username or email is required")
+    }
 
     const existedUser = await User.findOne({ $or :[{ username },{ email }]})
 
