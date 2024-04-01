@@ -21,6 +21,12 @@ const generateAccessAndRefreshTokens = async(userId) =>{
     }
 }
 
+// to secure with http
+
+const options = {
+    httpOnly : true,
+    secure : true
+}
 const registerUser = asyncHandler(async(req,res) =>{
     // get user details from frontend/ form(postman)
     // validation - not empty
@@ -169,8 +175,8 @@ const userLogout = asyncHandler(async(req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-          $set : {
-            refreshToken : undefined
+          $unset : {
+            refreshToken : 1 // this removes the field from document
           }   
         },
         {
@@ -191,9 +197,54 @@ const userLogout = asyncHandler(async(req, res) => {
 
 })
 
+//refreshAccessToken
+
+const refreshAccessToken = asyncHandler(async(req, res) => {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+    if(!incomingRefreshToken){
+        throw new ApiError(401, "Unauthorized request")
+    }
+
+    try {
+
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECERT)
+
+        const user = await User.findById(decodedToken?._id)
+
+        if(!user){
+            throw new ApiError(401, "Invalid Refresh Token")
+        }
+
+        if(incomingRefreshToken !== user?.refreshToken){
+            throw new ApiError(401, "Your Authorized Refresh token is expired or used.")
+        }
+
+        // generate new tokens
+
+       const {accessToken ,  newRefreshToken} = await generateAccessAndRefreshTokens(user._id)
+
+       return res.status(200)
+       .cookie("accessToken" , accessToken , options)
+       .cookie("refreshToken" , newRefreshToken, options)
+       .json(
+        new ApiResponse(
+            200,
+            {accessToken,  refreshToken : newRefreshToken},
+            "Successfull Access Token is refreshed"
+        )
+       )
+
+        
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid Refresh Token")
+        
+    }
+}) 
 
 export {
     registerUser,
     loginUser, 
-    userLogout
+    userLogout,
+    refreshAccessToken
 }
