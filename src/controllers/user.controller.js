@@ -266,7 +266,89 @@ const resetPassword = asyncHandler(async(req, res) =>{
     ))
 })
   
+// get the current user 
+// at route use authmiddleware to verify the user login or not!!
 
+const getCurrentUser = asyncHandler(async(req, req) =>{
+
+    return res.status(200)
+    .json(200, req.user, "got current user successfully!!")
+})
+
+// update Account Details
+// ->   get fullName, email
+// -> sometimes(social media platforms) username is not advice to change
+// Set the fullName, email using $set operator using findbyIdandUpdate
+// remove the password while updating select("-password")
+// return the user 
+
+const updateAccountDetails = asyncHandler(async(req, res) =>{
+    const {fullName, email} = req.body
+
+    if(!fullName || !email){
+        throw new ApiError(400, "All fields are required !")
+    }
+
+   const user = await User.findByIdAndUpdate
+    (
+        req.user?._id,
+        {
+            $set : {
+                fullName : fullName,
+                email: email
+            }
+        },
+        {new : true}
+
+    ).select("-password")
+
+    return res.status(200)
+    .json(new ApiResponse(
+        200,
+        user,
+        "User Account Details updated successfully"
+    ))
+})
+
+//Update Avatar (user)
+// use multer middleware to upload 
+// upload on cloudinary
+// error checks
+// return user without password
+
+
+const userAvatarUpdate = asyncHandler(async(req, res) => {
+
+    const avatarLocalPath  = req.file?.path
+    
+    if(!avatarLocalPath){
+        throw new ApiError(400, "Avatar is missing")
+    }
+
+    const avatar = uploadOnCloudinary(avatarLocalPath)
+
+    if(!avatar.url){
+        throw new ApiError(400, "Error while uploading the avatar")
+    }
+
+    const user = await User.findByIdAndUpdate
+    (
+        req.user?._id,
+        {
+            $set:{
+                avatar : avatar.url
+            }
+        },
+        {new: true}
+    ).select("-password")
+
+    return res.status(200)
+    .json(new ApiResponse(
+        200,
+        user,
+        "Avatar is updated Successfully"
+    ))
+})
 
 
 
@@ -278,5 +360,9 @@ export {
     loginUser, 
     userLogout,
     refreshAccessToken,
-    resetPassword
+    resetPassword,
+    getCurrentUser,
+    updateAccountDetails,
+    userAvatarUpdate
+
 }
