@@ -43,7 +43,7 @@ router.route("/getCurrent-user").get(verifyJWT, getCurrentUser)
 
 //patch - method (The HTTP PATCH request method applies partial modifications to a resource.)
 
-router.route("/update-user-account-").patch(verifyJWT, updateAccountDetails)
+router.route("/update-user-account").patch(verifyJWT, updateAccountDetails)
 router.route("/update-user-avatar").patch(verifyJWT, upload.single("avatar"), userAvatarUpdate)
 router.route("/update-cover-image").patch(verifyJWT, upload.single("coverImage"), coverImageUpdate)
 
