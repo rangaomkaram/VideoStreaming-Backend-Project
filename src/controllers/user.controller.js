@@ -412,6 +412,60 @@ const coverImageUpdate = asyncHandler(async(req, res) => {
 })
 
 
+// get User Channel profile
+
+const getUserChannelProfile = asyncHandler(async(req, res) => {
+
+    try {
+
+        const {username} =  req.params
+
+        if (!username?.trim()) {
+            throw new ApiError(400, "username is missing")
+        }
+
+        const channel = await User.aggregate([
+            {
+                $match : {
+                    username : username?.toLowerCase()
+                }
+            },
+            {
+                $lookup: {
+                    from : "subscriptions", // mongoDB model become plural and in lowercase
+                    localField: "_id",
+                    foreignField : "channel",
+                    as : "subscribers"
+                }
+            },
+            {
+                $lookup:{
+                    from : "subscriptions",
+                    localField: "_id",
+                    foreignField: "subscriber",
+                    as : "subscriberToChannel"
+                } 
+            },
+            {
+                $addFields: {
+                    subscribersCount : {
+                        $size:"$subscribers"
+                    },
+                    channelsSubscribedToCount : {
+                        $size: "$subscriberToChannel"
+                    }
+                }
+            }
+        ])
+
+        
+    } catch (error) {
+        throw new ApiError(500, "Something went wrong while retriving channel profile")
+    }
+})
+
+
+
 // export
 
 export {
@@ -423,6 +477,7 @@ export {
     getCurrentUser,
     updateAccountDetails,
     userAvatarUpdate,
-    coverImageUpdate
+    coverImageUpdate,
+    getUserChannelProfile
 
 }
