@@ -492,7 +492,13 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
     }
 })
 
+//get watch history
 
+const getWatchHistory = asyncHandler(async(req, res) => {
+
+    //to get ObjectId -> use mongoose , if we go with req.user._id -> we only get the string 
+    const user = await User.aggregate([])
+})
 
 // export
 
