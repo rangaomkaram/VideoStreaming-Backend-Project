@@ -4,7 +4,7 @@
        - Express, MongoDB, NodeJs , Javascript 
        -  For Secure tokens : jwt (jsonwebtoken)
        - For Upload files/middleware  - multer
-       - For image uploading (cloudinary)
+       - For image uploading (Cloudinary)
 
 ### This is a backend project with features like YouTube (login, register/signup, like, share, subscribe ...)
 
