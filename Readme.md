@@ -27,13 +27,7 @@ File Uploads:
 
 <h3>Error Handling:</h3>
        ->  Strategies for robust error handling and logging to ensure reliability and ease of debugging.
- <h3>Testing:</h3> 
-         -> Guidelines for writing and running tests to ensure code quality and application stability.
-
-
-- further, need to take performance optimization and security 
-
-
+ 
 <p>
 This endeavor is an intricate backend initiative, constructed utilizing Node.js, Express.js, MongoDB, Mongoose, JWT, bcrypt, among other technologies. We’re in the process of developing a full-fledged video hosting platform, akin to YouTube, equipped with a complete suite of features including user registration, video uploading, likes, dislike, comments, replying, subscribe, and unsubscribing, and notifications,further, we can add - other futures -> join, thumbnail, share and goes on...
 </p>
